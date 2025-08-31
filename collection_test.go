@@ -134,19 +134,25 @@ func TestCollectionService(t *testing.T) {
 		// Query active users
 		activeUsers, err := userCollection.QueryByField("isActive", true, nil)
 		assert.NoError(t, err, "Failed to query by field")
+		assert.NotNil(t, activeUsers, "Query result should not be nil")
 
 		// Verify all returned users are active
-		for _, user := range activeUsers.Results {
-			assert.True(t, user.IsActive, "All returned users should be active")
+		if activeUsers != nil {
+			for _, user := range activeUsers.Results {
+				assert.True(t, user.IsActive, "All returned users should be active")
+			}
 		}
 
 		// Query inactive users
 		inactiveUsers, err := userCollection.QueryByField("isActive", false, nil)
 		assert.NoError(t, err, "Failed to query inactive users")
+		assert.NotNil(t, inactiveUsers, "Query result should not be nil")
 
 		// Verify all returned users are inactive
-		for _, user := range inactiveUsers.Results {
-			assert.False(t, user.IsActive, "All returned users should be inactive")
+		if inactiveUsers != nil {
+			for _, user := range inactiveUsers.Results {
+				assert.False(t, user.IsActive, "All returned users should be inactive")
+			}
 		}
 	})
 
