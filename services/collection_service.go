@@ -147,7 +147,18 @@ func (cs *CollectionService[T]) Delete(id string) error {
 	}
 	defer session.Close()
 
-	session.Delete(id)
+	// Load document first, then delete - same pattern as database service
+	var document *T
+	err = session.Load(&document, id)
+	if err != nil {
+		return fmt.Errorf("failed to load document for deletion: %w", err)
+	}
+	
+	if document == nil {
+		return fmt.Errorf("document with ID %s not found", id)
+	}
+
+	session.Delete(document)
 	return session.SaveChanges()
 }
 
@@ -160,8 +171,18 @@ func (cs *CollectionService[T]) DeleteMultiple(ids []string) error {
 	}
 	defer session.Close()
 
+	// Load each document first, then delete - same pattern as database service
 	for _, id := range ids {
-		session.Delete(id)
+		var document *T
+		err = session.Load(&document, id)
+		if err != nil {
+			return fmt.Errorf("failed to load document %s for deletion: %w", id, err)
+		}
+		
+		if document != nil {
+			session.Delete(document)
+		}
+		// Skip if document doesn't exist instead of failing
 	}
 
 	return session.SaveChanges()
@@ -191,6 +212,8 @@ func (cs *CollectionService[T]) Query(options *interfaces.QueryOptions) (*interf
 
 	// Build RQL query dynamically
 	var rqlQuery strings.Builder
+	// For now, use a flexible approach that works with Go struct collections
+	// RavenDB Go client typically assigns collection names based on the struct type name
 	rqlQuery.WriteString(fmt.Sprintf("from @all_docs where @metadata.'@collection' = '%s'", cs.collection))
 
 	// Add WHERE clause if specified

@@ -96,7 +96,7 @@ func (ds *DatabaseService) LoadMultipleByIDs(ids []string, results interface{}) 
 	return nil
 }
 
-// Update updates an existing document
+// Update updates an existing document by loading, modifying, and saving
 func (ds *DatabaseService) Update(id string, updates map[string]interface{}) error {
 	store := ds.GetStore().(*ravendb.DocumentStore)
 	session, err := store.OpenSession(ds.GetDatabase())
@@ -105,24 +105,29 @@ func (ds *DatabaseService) Update(id string, updates map[string]interface{}) err
 	}
 	defer session.Close()
 
-	// Load the document first
-	var document map[string]interface{}
-	err = session.Load(&document, id)
+	// Use raw query to load the document as a generic map
+	query := session.Advanced().RawQuery("from @all_docs where id() = $id")
+	query = query.AddParameter("id", id)
+
+	var results []*map[string]interface{}
+	err = query.GetResults(&results)
 	if err != nil {
 		return fmt.Errorf("failed to load document for update: %w", err)
 	}
 
-	if document == nil {
+	if len(results) == 0 || results[0] == nil {
 		return fmt.Errorf("document with ID %s not found", id)
 	}
 
+	document := results[0]
+
 	// Apply updates
 	for key, value := range updates {
-		document[key] = value
+		(*document)[key] = value
 	}
 
-	// Store the updated document
-	err = session.StoreWithID(document, id)
+	// Store the updated document - let RavenDB handle the ID from the document
+	err = session.Store(document)
 	if err != nil {
 		return fmt.Errorf("failed to store updated document: %w", err)
 	}
@@ -139,7 +144,22 @@ func (ds *DatabaseService) Delete(id string) error {
 	}
 	defer session.Close()
 
-	session.Delete(id)
+	// Use a simple generic struct for loading
+	type GenericDeleteDoc struct {
+		ID string `json:"@id"`
+	}
+	var document *GenericDeleteDoc
+	err = session.Load(&document, id)
+	if err != nil {
+		return fmt.Errorf("failed to load document for deletion: %w", err)
+	}
+	
+	if document == nil {
+		return fmt.Errorf("document with ID %s not found", id)
+	}
+
+	// Delete the loaded document
+	session.Delete(document)
 	return session.SaveChanges()
 }
 
@@ -152,8 +172,22 @@ func (ds *DatabaseService) DeleteMultiple(ids []string) error {
 	}
 	defer session.Close()
 
+	// Use the same approach as single delete - load first, then delete
+	type GenericDeleteDoc struct {
+		ID string `json:"@id"`
+	}
+
 	for _, id := range ids {
-		session.Delete(id)
+		var document *GenericDeleteDoc
+		err = session.Load(&document, id)
+		if err != nil {
+			return fmt.Errorf("failed to load document %s for deletion: %w", id, err)
+		}
+		
+		if document != nil {
+			session.Delete(document)
+		}
+		// Skip if document doesn't exist instead of failing
 	}
 
 	return session.SaveChanges()
@@ -170,7 +204,11 @@ func (ds *DatabaseService) Exists(id string) (bool, error) {
 	}
 	defer session.Close()
 
-	var document map[string]interface{}
+	// Try to load as a generic struct - RavenDB will return nil if document doesn't exist
+	type GenericDoc struct{
+		ID string `json:"@id"`
+	}
+	var document *GenericDoc
 	err = session.Load(&document, id)
 	if err != nil {
 		return false, fmt.Errorf("failed to check document existence: %w", err)
