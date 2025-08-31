@@ -134,7 +134,7 @@ func TestCollectionService(t *testing.T) {
 		// Query active users
 		activeUsers, err := userCollection.QueryByField("isActive", true, nil)
 		assert.NoError(t, err, "Failed to query by field")
-		
+
 		// Verify all returned users are active
 		for _, user := range activeUsers.Results {
 			assert.True(t, user.IsActive, "All returned users should be active")
@@ -143,7 +143,7 @@ func TestCollectionService(t *testing.T) {
 		// Query inactive users
 		inactiveUsers, err := userCollection.QueryByField("isActive", false, nil)
 		assert.NoError(t, err, "Failed to query inactive users")
-		
+
 		// Verify all returned users are inactive
 		for _, user := range inactiveUsers.Results {
 			assert.False(t, user.IsActive, "All returned users should be inactive")
@@ -195,7 +195,7 @@ func TestCollectionService(t *testing.T) {
 
 		// Verify ordering (should be descending by age)
 		if len(results.Results) >= 2 {
-			assert.GreaterOrEqual(t, results.Results[0].Age, results.Results[1].Age, 
+			assert.GreaterOrEqual(t, results.Results[0].Age, results.Results[1].Age,
 				"Results should be ordered by age descending")
 		}
 	})
@@ -239,7 +239,7 @@ func TestGenericQueryOperations(t *testing.T) {
 
 	// Set up test data
 	productCollection := NewCollection[TestProduct](db, "Products")
-	
+
 	products := map[string]TestProduct{
 		"products/laptop": {
 			ID:          "products/laptop",
@@ -280,7 +280,7 @@ func TestGenericQueryOperations(t *testing.T) {
 		// Query products in stock
 		inStockProducts, err := QueryByField[TestProduct](db, "Products", "inStock", true, nil)
 		assert.NoError(t, err, "Failed to query products by field generically")
-		
+
 		// Verify all returned products are in stock
 		for _, product := range inStockProducts.Results {
 			assert.True(t, product.InStock, "All returned products should be in stock")

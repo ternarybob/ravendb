@@ -21,9 +21,9 @@ type DatabaseConfig struct {
 
 // TestSettings holds test-specific settings
 type TestSettings struct {
-	Timeout           int  `toml:"timeout"`
-	CleanBeforeTests  bool `toml:"clean_before_tests"`
-	CleanAfterTests   bool `toml:"clean_after_tests"`
+	Timeout          int  `toml:"timeout"`
+	CleanBeforeTests bool `toml:"clean_before_tests"`
+	CleanAfterTests  bool `toml:"clean_after_tests"`
 }
 
 // LoadTestConfig loads test configuration from TOML file

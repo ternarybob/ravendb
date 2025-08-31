@@ -132,7 +132,7 @@ func (ds *DatabaseService) GetDatabaseStatus() (map[string]interface{}, error) {
 	// Get database statistics
 	statisticsOperation := ravendb.NewGetStatisticsOperation("")
 	result := ds.store.Maintenance().ForDatabase(ds.database).Send(statisticsOperation)
-	
+
 	if result == nil {
 		status["database_name"] = ds.database
 		status["status"] = "connected"

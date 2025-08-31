@@ -8,7 +8,10 @@
       "Read(C:\\development\\pexa\\pexa-mock-api\\src\\services/**)",
       "Read(C:\\development\\pexa\\pexa-mock-api\\src\\services/**)",
       "Read(C:\\development\\pexa\\pexa-mock-api\\src/**)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(gofmt:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []
