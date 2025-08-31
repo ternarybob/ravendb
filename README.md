@@ -2,6 +2,8 @@
 
 A generic, type-safe RavenDB client library for Go applications. This library provides clean interfaces, type-safe operations, and easy-to-use APIs for working with RavenDB.
 
+[![CI/CD Pipeline](https://github.com/ternarybob/ravendb/actions/workflows/ci.yml/badge.svg)](https://github.com/ternarybob/ravendb/actions/workflows/ci.yml)
+
 ## Features
 
 - **Type-safe operations** using Go generics
