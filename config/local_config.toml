@@ -1,0 +1,8 @@
+[database]
+urls = ["http://localhost:8080"]
+database = "RavenDBLib_Local"
+
+[test]
+timeout = 60
+clean_before_tests = false
+clean_after_tests = false

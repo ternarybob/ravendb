@@ -1,0 +1,8 @@
+[database]
+urls = ["http://ravendb-ci:8080"]
+database = "RavenDBLib_CI"
+
+[test]
+timeout = 120
+clean_before_tests = true
+clean_after_tests = true

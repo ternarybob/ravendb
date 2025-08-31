@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(C:\\development\\pexa\\pexa-mock-api/**)",
+      "Read(C:\\development\\pexa\\pexa-mock-api/**)",
+      "Read(C:\\development\\pexa\\pexa-mock-api\\src\\interfaces/**)",
+      "Read(C:\\development\\pexa\\pexa-mock-api\\src\\services/**)",
+      "Read(C:\\development\\pexa\\pexa-mock-api\\src\\services/**)",
+      "Read(C:\\development\\pexa\\pexa-mock-api\\src\\services/**)",
+      "Read(C:\\development\\pexa\\pexa-mock-api\\src/**)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

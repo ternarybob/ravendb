@@ -1,0 +1,8 @@
+[database]
+urls = ["http://localhost:8080"]
+database = "RavenDBLib_Docker"
+
+[test]
+timeout = 90
+clean_before_tests = true
+clean_after_tests = true
