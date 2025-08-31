@@ -242,13 +242,46 @@ go test -v -run "TestCollection.*"  # Collection tests
 
 ### Test Categories
 
-- **Connection Tests**: Database connectivity and initialization
-- **CRUD Operations**: Store, load, update, delete operations
-- **Collection Services**: Type-safe collection operations
-- **Query Operations**: All query types (field, range, search, generic)
-- **Integration Tests**: End-to-end scenarios with real RavenDB
+#### 1. Database Connection Tests (`TestDatabaseConnection`)
+- **Purpose**: Verify RavenDB server connectivity
+- **Tests**: Database service creation, initialization, connection status verification
 
-### Configuration Example
+#### 2. Database Availability Tests (`TestDatabaseAvailability`)
+- **Purpose**: Ensure database is accessible and operational
+- **Tests**: Database name retrieval, document store access, basic operations
+
+#### 3. Basic CRUD Tests (`TestBasicCRUDOperations`)
+- **Purpose**: Test fundamental document operations
+- **Tests**:
+  - **Store and Load**: Create and retrieve documents
+  - **Document Exists**: Check document existence
+  - **Update Document**: Modify existing documents
+  - **Store Multiple**: Bulk document creation
+  - **Delete Document**: Single document removal
+  - **Delete Multiple**: Bulk document removal
+
+#### 4. Collection Service Tests (`TestCollectionService`)
+- **Purpose**: Test type-safe collection operations
+- **Tests**:
+  - **Typed CRUD**: Store/load with strong typing
+  - **Multiple Operations**: Bulk typed operations
+  - **Update Operations**: Modify typed documents
+  - **Query All**: Retrieve all documents in collection
+  - **Query by Field**: Filter by specific field values
+  - **Query by Range**: Filter by value ranges
+  - **Search**: Full-text search across fields
+  - **Query with Options**: Custom query parameters
+  - **Count**: Document counting
+
+#### 5. Generic Query Tests (`TestGenericQueryOperations`)
+- **Purpose**: Test generic query functions across document types
+- **Tests**:
+  - **Generic Query All**: Query any document type
+  - **Generic Query by Field**: Type-safe field filtering
+  - **Generic Query by Range**: Type-safe range queries
+  - **Generic Search**: Type-safe text search
+
+### Configuration Options
 
 ```toml
 # config/test_config.toml
@@ -262,7 +295,75 @@ clean_before_tests = true
 clean_after_tests = true
 ```
 
-For detailed testing information, see [TESTING.md](TESTING.md).
+- **`database.urls`**: Array of RavenDB server URLs
+- **`database.database`**: Test database name (created if doesn't exist)
+- **`test.timeout`**: Test timeout in seconds
+- **`test.clean_before_tests`**: Clean database before running tests
+- **`test.clean_after_tests`**: Clean database after running tests
+
+### Test Data Structures
+
+The tests use two main document types:
+
+```go
+type TestUser struct {
+    ID       string    `json:"id"`
+    Name     string    `json:"name"`
+    Email    string    `json:"email"`
+    Age      int       `json:"age"`
+    IsActive bool      `json:"isActive"`
+    Created  time.Time `json:"created"`
+}
+
+type TestProduct struct {
+    ID          string  `json:"id"`
+    Name        string  `json:"name"`
+    Description string  `json:"description"`
+    Price       float64 `json:"price"`
+    Category    string  `json:"category"`
+    InStock     bool    `json:"inStock"`
+}
+```
+
+### Coverage Goals
+
+- **Minimum Coverage**: 80%
+- **Target Coverage**: 90%+
+
+The test suite covers:
+- All public interface methods
+- Error handling paths
+- Edge cases (empty results, invalid parameters)
+- Type safety scenarios
+- Concurrent operations (where applicable)
+
+### Troubleshooting
+
+#### RavenDB Connection Issues
+1. Verify RavenDB server is running: `curl http://localhost:8080`
+2. Check server logs for errors
+3. Ensure no firewall blocking connections
+4. Verify correct URL in `test_config.toml`
+
+#### Test Failures
+1. Check test output for specific error messages
+2. Verify test data isn't conflicting
+3. Ensure database permissions are correct
+4. Check for resource cleanup issues
+
+### Continuous Integration
+
+For CI/CD pipelines:
+```bash
+# Install dependencies
+go mod download
+
+# Run tests with JUnit output
+go test -v ./... -coverprofile=coverage.out -json > test-results.json
+
+# Generate coverage report
+go tool cover -html=coverage.out -o coverage.html
+```
 
 ## Architecture
 

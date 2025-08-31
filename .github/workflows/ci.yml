@@ -1,0 +1,152 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    tags:
+      - 'v*'
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  GO_VERSION: '1.25'
+
+jobs:
+  test:
+    name: "🧪 Test & Validate"
+    runs-on: ubuntu-latest
+    
+    services:
+      ravendb:
+        image: ravendb/ravendb:latest
+        ports:
+          - 5173:8080
+        env:
+          RAVEN_ARGS: "--Setup.Mode=None --License.Eula.Accepted=true --Security.UnsecuredAccessAllowed=PublicNetwork"
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ env.GO_VERSION }}
+        
+    - name: Clean Go modcache before restore
+      run: go clean -modcache || true
+      
+    - name: Cache Go modules
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-v2
+        restore-keys: |
+          ${{ runner.os }}-go-
+      continue-on-error: true
+          
+    - name: Clean and download dependencies
+      run: |
+        # Clean module cache if there are issues
+        go clean -modcache || true
+        
+        # Download dependencies with proper error handling
+        if ! go mod download; then
+          echo "Error: Failed to download Go modules"
+          echo "Attempting to clean and retry..."
+          go clean -modcache
+          go mod download
+        fi
+        
+        # Verify modules are properly downloaded
+        go mod verify
+      
+    - name: Wait for RavenDB to be ready
+      run: |
+        echo "Waiting for RavenDB to start..."
+        timeout 60s bash -c 'until curl -f http://localhost:5173; do sleep 2; done'
+        echo "RavenDB is ready!"
+      
+    - name: Run tests
+      run: go test -v ./...
+      
+    - name: Run go vet
+      run: go vet ./...
+      
+    - name: Check formatting
+      run: |
+        UNFORMATTED=$(gofmt -s -l .)
+        if [ -n "$UNFORMATTED" ]; then
+          echo "⚠️  The following files are not formatted properly:"
+          echo "$UNFORMATTED"
+          echo ""
+          echo "💡 To fix, run: gofmt -s -w ."
+          echo ""
+          echo "🔧 Showing formatting differences:"
+          gofmt -s -d .
+          exit 1
+        else
+          echo "✅ All files are properly formatted"
+        fi
+        
+    - name: Build
+      run: go build ./...
+
+  release:
+    name: "🚀 Create Release"
+    runs-on: ubuntu-latest
+    needs: test
+    if: (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Determine release version
+      id: version
+      run: |
+        if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+          # Manual tag push - use the tag name
+          VERSION="${{ github.ref_name }}"
+          echo "release_type=manual" >> $GITHUB_OUTPUT
+        else
+          # Main branch push - auto-increment patch version
+          LATEST=$(git describe --tags --abbrev=0 2>/dev/null || echo "v1.0.0")
+          NEXT=$(echo $LATEST | awk -F. '{$NF++; print}' OFS='.')
+          VERSION=$NEXT
+          echo "release_type=auto" >> $GITHUB_OUTPUT
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Release version: $VERSION"
+        
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ steps.version.outputs.version }}
+        name: Release ${{ steps.version.outputs.version }}
+        generate_release_notes: true
+        make_latest: true
+        body: |
+          ## Release ${{ steps.version.outputs.version }}
+          
+          ${{ steps.version.outputs.release_type == 'auto' && 'Auto-generated release from main branch' || 'Manual release' }}
+          
+          ### Installation
+          ```go
+          go get github.com/ternarybob/ravendb@${{ steps.version.outputs.version }}
+          ```
+          
+          ### Features
+          - Generic RavenDB operations with type safety
+          - Comprehensive CRUD operations
+          - Query operations (field queries, range queries, search)
+          - Collection-based operations
+          - TOML-based configuration support
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

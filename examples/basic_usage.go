@@ -193,7 +193,7 @@ func genericQueryExample(db interfaces.IRavenDBService) {
 	}
 	fmt.Printf("✓ Found %d products in price range $20-$1000\n", len(priceRangeResults.Results))
 
-	// Query all products 
+	// Query all products
 	expensiveProducts, err := ravendb.QueryAll[Product](db, "Products")
 	if err != nil {
 		log.Printf("Failed to query expensive products: %v", err)

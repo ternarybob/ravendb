@@ -17,7 +17,9 @@
       "Bash(go mod:*)",
       "Bash(go build:*)",
       "Bash(go test:*)",
-      "Read(C:\\development\\pexa\\pexa-mock-api\\src\\services/**)"
+      "Read(C:\\development\\pexa\\pexa-mock-api\\src\\services/**)",
+      "Read(C:\\development\\ternarybob\\arbor\\.github\\workflows/**)",
+      "Bash(Remove-Item \"C:\\development\\ternarybob\\ravendb\\TESTING.md\")"
     ],
     "deny": [],
     "ask": []
