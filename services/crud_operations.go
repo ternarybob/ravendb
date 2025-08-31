@@ -153,7 +153,7 @@ func (ds *DatabaseService) Delete(id string) error {
 	if err != nil {
 		return fmt.Errorf("failed to load document for deletion: %w", err)
 	}
-	
+
 	if document == nil {
 		return fmt.Errorf("document with ID %s not found", id)
 	}
@@ -183,7 +183,7 @@ func (ds *DatabaseService) DeleteMultiple(ids []string) error {
 		if err != nil {
 			return fmt.Errorf("failed to load document %s for deletion: %w", id, err)
 		}
-		
+
 		if document != nil {
 			session.Delete(document)
 		}
@@ -205,7 +205,7 @@ func (ds *DatabaseService) Exists(id string) (bool, error) {
 	defer session.Close()
 
 	// Try to load as a generic struct - RavenDB will return nil if document doesn't exist
-	type GenericDoc struct{
+	type GenericDoc struct {
 		ID string `json:"@id"`
 	}
 	var document *GenericDoc

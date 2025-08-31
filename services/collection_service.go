@@ -153,7 +153,7 @@ func (cs *CollectionService[T]) Delete(id string) error {
 	if err != nil {
 		return fmt.Errorf("failed to load document for deletion: %w", err)
 	}
-	
+
 	if document == nil {
 		return fmt.Errorf("document with ID %s not found", id)
 	}
@@ -178,7 +178,7 @@ func (cs *CollectionService[T]) DeleteMultiple(ids []string) error {
 		if err != nil {
 			return fmt.Errorf("failed to load document %s for deletion: %w", id, err)
 		}
-		
+
 		if document != nil {
 			session.Delete(document)
 		}
