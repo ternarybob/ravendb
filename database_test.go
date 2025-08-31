@@ -90,15 +90,16 @@ func TestBasicCRUDOperations(t *testing.T) {
 		}
 
 		// Store document
-		err := db.Store("users/test-1", user)
+		err := db.Store("users/test-1", &user)
 		assert.NoError(t, err, "Failed to store document")
 
 		// Load document
-		var loadedUser TestUser
+		var loadedUser *TestUser
 		err = db.LoadByID("users/test-1", &loadedUser)
 		assert.NoError(t, err, "Failed to load document")
 
 		// Verify document contents
+		assert.NotNil(t, loadedUser)
 		assert.Equal(t, user.ID, loadedUser.ID)
 		assert.Equal(t, user.Name, loadedUser.Name)
 		assert.Equal(t, user.Email, loadedUser.Email)
@@ -128,7 +129,7 @@ func TestBasicCRUDOperations(t *testing.T) {
 		assert.NoError(t, err, "Failed to update document")
 
 		// Load and verify updates
-		var updatedUser TestUser
+		var updatedUser *TestUser
 		err = db.LoadByID("users/test-1", &updatedUser)
 		assert.NoError(t, err, "Failed to load updated document")
 		assert.Equal(t, 31, updatedUser.Age)
@@ -137,7 +138,7 @@ func TestBasicCRUDOperations(t *testing.T) {
 
 	t.Run("StoreMultipleDocuments", func(t *testing.T) {
 		users := map[string]interface{}{
-			"users/test-2": TestUser{
+			"users/test-2": &TestUser{
 				ID:       "users/test-2",
 				Name:     "Jane Smith",
 				Email:    "jane@example.com",
@@ -145,7 +146,7 @@ func TestBasicCRUDOperations(t *testing.T) {
 				IsActive: true,
 				Created:  time.Now(),
 			},
-			"users/test-3": TestUser{
+			"users/test-3": &TestUser{
 				ID:       "users/test-3",
 				Name:     "Bob Johnson",
 				Email:    "bob@example.com",

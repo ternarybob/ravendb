@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/pelletier/go-toml/v2"
+	"github.com/ternarybob/ravendb/services"
 )
 
 // TestConfig holds the test configuration
@@ -43,7 +44,7 @@ func LoadTestConfig(filepath string) (*TestConfig, error) {
 }
 
 // SetupTestDatabase creates a test database service with the given config
-func SetupTestDatabase(t *testing.T, testConfig *TestConfig) (*DatabaseService, func()) {
+func SetupTestDatabase(t *testing.T, testConfig *TestConfig) (*services.DatabaseService, func()) {
 	config := &Config{
 		URLs:     testConfig.Database.URLs,
 		Database: testConfig.Database.Database,
@@ -69,5 +70,5 @@ func SetupTestDatabase(t *testing.T, testConfig *TestConfig) (*DatabaseService, 
 		db.Close()
 	}
 
-	return db.(*DatabaseService), cleanup
+	return db.(*services.DatabaseService), cleanup
 }

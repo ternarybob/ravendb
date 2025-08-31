@@ -150,8 +150,8 @@ func Search[T any](service interfaces.IRavenDBService, collection, searchTerm st
 
 	for i, field := range searchFields {
 		paramName := fmt.Sprintf("searchTerm%d", i)
-		whereConditions = append(whereConditions, fmt.Sprintf("%s LIKE $%s", field, paramName))
-		options.Parameters[paramName] = fmt.Sprintf("*%s*", searchTerm)
+		whereConditions = append(whereConditions, fmt.Sprintf("search(%s, $%s)", field, paramName))
+		options.Parameters[paramName] = searchTerm
 	}
 
 	if len(whereConditions) > 0 {

@@ -168,6 +168,102 @@ expensiveProducts, _ := ravendb.QueryByField[Product](
 )
 ```
 
+## Testing
+
+The library includes a comprehensive test suite that covers all functionality with real RavenDB integration tests.
+
+### Prerequisites
+
+1. **RavenDB Server**: You need a running RavenDB instance
+   ```bash
+   # Download from https://ravendb.net/downloads
+   # OR use Docker
+   docker run -p 8080:8080 ravendb/ravendb
+   ```
+
+2. **Go 1.25+**: Ensure you have Go 1.25 or later installed
+
+### Quick Test Setup
+
+1. **Environment Setup**:
+   ```powershell
+   # Setup test environment (creates config files)
+   .\scripts\test-env-manager.ps1 setup test
+   ```
+
+2. **Run Tests**:
+   ```powershell
+   # Run all tests
+   .\scripts\run-tests.ps1
+   
+   # Run with coverage
+   .\scripts\run-tests.ps1 -Coverage
+   
+   # Run specific tests
+   .\scripts\run-tests.ps1 -Pattern "TestDatabase.*"
+   ```
+
+### Test Environments
+
+The library supports multiple test environments through TOML configuration:
+
+- **`config/test_config.toml`** - Standard test configuration
+- **`config/local_config.toml`** - Local development
+- **`config/docker_config.toml`** - Docker environment
+- **`config/ci_config.toml`** - CI/CD environment
+
+```powershell
+# List available environments
+.\scripts\test-env-manager.ps1 list
+
+# Create new environment config
+.\scripts\test-env-manager.ps1 create local
+
+# Run tests for specific environment
+.\scripts\test-env-manager.ps1 test docker -Coverage
+```
+
+### Manual Test Execution
+
+```bash
+# Run all tests manually
+go test -v ./...
+
+# Run with coverage
+go test -v -cover -coverprofile=coverage.out ./...
+
+# Generate HTML coverage report
+go tool cover -html=coverage.out -o coverage.html
+
+# Run specific test categories
+go test -v -run "TestDatabase.*"    # Database tests
+go test -v -run "TestCollection.*"  # Collection tests
+```
+
+### Test Categories
+
+- **Connection Tests**: Database connectivity and initialization
+- **CRUD Operations**: Store, load, update, delete operations
+- **Collection Services**: Type-safe collection operations
+- **Query Operations**: All query types (field, range, search, generic)
+- **Integration Tests**: End-to-end scenarios with real RavenDB
+
+### Configuration Example
+
+```toml
+# config/test_config.toml
+[database]
+urls = ["http://localhost:8080"]
+database = "RavenDBLibTestDB"
+
+[test]
+timeout = 30
+clean_before_tests = true
+clean_after_tests = true
+```
+
+For detailed testing information, see [TESTING.md](TESTING.md).
+
 ## Architecture
 
 The library is structured around clean interfaces:

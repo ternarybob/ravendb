@@ -1,5 +1,5 @@
 [database]
-urls = ["http://localhost:8080"]
+urls = ["http://localhost:5173"]
 database = "RavenDBLibTestDB"
 
 [test]
